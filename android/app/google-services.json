@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "140530809923",
+    "project_id": "tccalimentracker",
+    "storage_bucket": "tccalimentracker.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:140530809923:android:ed6a5bd919e4758f14a8f6",
+        "android_client_info": {
+          "package_name": "com.example.alimentracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0BtaGhq3hCqJapMvyZ9S5VQ3QCR-_A28"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
