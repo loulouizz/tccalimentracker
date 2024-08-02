@@ -1,26 +1,36 @@
 {
   "project_info": {
-    "project_number": "140530809923",
-    "project_id": "tccalimentracker",
-    "storage_bucket": "tccalimentracker.appspot.com"
+    "project_number": "403363331640",
+    "project_id": "tccalimentracker-ae930",
+    "storage_bucket": "tccalimentracker-ae930.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:140530809923:android:ed6a5bd919e4758f14a8f6",
+        "mobilesdk_app_id": "1:403363331640:android:cb1e1a5ca67e0a4975b0cd",
         "android_client_info": {
           "package_name": "com.example.alimentracker"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "403363331640-d4p1si2pkgqj6n6e3dvq98vai9prbrvk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyB0BtaGhq3hCqJapMvyZ9S5VQ3QCR-_A28"
+          "current_key": "AIzaSyB0zvpI_wNaZWyO4uh5knhz35JtpHDhG4s"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "403363331640-d4p1si2pkgqj6n6e3dvq98vai9prbrvk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
