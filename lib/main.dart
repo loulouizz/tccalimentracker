@@ -10,7 +10,7 @@ import 'src/shared/themes/colors_schemes.g.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  _initializeFirebase();
+  await _initializeFirebase();
   runApp(MyApp());
 }
 
