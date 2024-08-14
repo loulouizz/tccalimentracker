@@ -1,4 +1,5 @@
 import 'package:alimentracker/auth.dart';
+import 'package:alimentracker/screens/sign_up_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -28,17 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> createUserWithEmailAndPassword() async {
-    try {
-      await Auth().createUserWithEmailAndPassword(
-          email: _emailEC.text, password: _passwordEC.text);
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        errorMessage = e.message;
-      });
-    }
-  }
-
   Widget _title() {
     return const Text('Firebase Auth');
   }
@@ -52,14 +42,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _submitButton() {
-    return ElevatedButton(
-      onPressed:
-          isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
-      child: Text(isLogin ? 'Login' : 'Register'),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.person, size: 100, color: Colors.greenAccent[700],),
+              Icon(Icons.person, size: 200, color: Colors.greenAccent[700],),
               SizedBox(height: 20,),
               Text("Seja bem-vindo novamente!", style: GoogleFonts.roboto(fontSize: 28),),
               SizedBox(height: 10,),
@@ -83,7 +65,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.only(left: 20),
                     child: TextFormField(
                       controller: _emailEC,
-                      obscureText: true,
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: "Email",
@@ -140,7 +121,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text("Não tem conta?", style: GoogleFonts.roboto(fontWeight: FontWeight.bold),),
-                  Text(" Crie aqui", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),)
+                  GestureDetector(onTap: (){
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignUpScreen()));
+                  }, child: Text(" Crie aqui", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),))
                 ],
               ),
             ],

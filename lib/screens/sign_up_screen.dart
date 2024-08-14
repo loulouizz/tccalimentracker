@@ -1,0 +1,126 @@
+import 'package:alimentracker/auth.dart';
+import 'package:alimentracker/screens/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  String? errorMessage = '';
+
+  TextEditingController _emailEC = TextEditingController();
+  TextEditingController _passwordEC = TextEditingController();
+
+  Future<void> createUserWithEmailAndPassword() async {
+    try {
+      await Auth().createUserWithEmailAndPassword(
+          email: _emailEC.text, password: _passwordEC.text);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Cadastro realizado com sucesso")));
+      Navigator.of(context).pop();
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        errorMessage = e.message;
+      });
+    }
+  }
+
+  Widget _errorMessage() {
+    return Column(
+      children: [Text(errorMessage == '' ? '' : 'Hmm? $errorMessage'),
+        SizedBox(height: 10,)],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Cadastro"),
+      ),
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.person_add, size: 200, color: Colors.greenAccent[700],),
+              SizedBox(height: 10,),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    border: Border.all(color: Colors.white),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20),
+                    child: TextFormField(
+                      controller: _emailEC,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: "Email",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 10,),
+
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    border: Border.all(color: Colors.white),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20),
+                    child: TextFormField(
+                      controller: _passwordEC,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: "Senha",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(
+                height: 10,
+              ),
+
+              _errorMessage(),
+
+              SizedBox(
+                height: 10,
+              ),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: GestureDetector(
+                  onTap: createUserWithEmailAndPassword,
+                  child: Container(
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.greenAccent[700],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(child: Text("Cadastrar", style: GoogleFonts.roboto(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

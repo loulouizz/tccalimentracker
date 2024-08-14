@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Firebase Test',
+      themeMode: ThemeMode.system,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: MaterialTheme.lightScheme()
