@@ -46,6 +46,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '140530809923',
     projectId: 'tccalimentracker',
     authDomain: 'tccalimentracker.firebaseapp.com',
+    databaseURL: 'https://tccalimentracker-default-rtdb.firebaseio.com',
     storageBucket: 'tccalimentracker.appspot.com',
     measurementId: 'G-FHW6F87KEW',
   );
@@ -55,6 +56,7 @@ class DefaultFirebaseOptions {
     appId: '1:140530809923:android:ed6a5bd919e4758f14a8f6',
     messagingSenderId: '140530809923',
     projectId: 'tccalimentracker',
+    databaseURL: 'https://tccalimentracker-default-rtdb.firebaseio.com',
     storageBucket: 'tccalimentracker.appspot.com',
   );
 
@@ -63,7 +65,9 @@ class DefaultFirebaseOptions {
     appId: '1:140530809923:ios:d8803926e2a68cf114a8f6',
     messagingSenderId: '140530809923',
     projectId: 'tccalimentracker',
+    databaseURL: 'https://tccalimentracker-default-rtdb.firebaseio.com',
     storageBucket: 'tccalimentracker.appspot.com',
+    iosClientId: '140530809923-epbg5vknld9vvv9da2jjtoumk23j7ees.apps.googleusercontent.com',
     iosBundleId: 'com.example.alimentracker',
   );
 
@@ -72,7 +76,9 @@ class DefaultFirebaseOptions {
     appId: '1:140530809923:ios:d8803926e2a68cf114a8f6',
     messagingSenderId: '140530809923',
     projectId: 'tccalimentracker',
+    databaseURL: 'https://tccalimentracker-default-rtdb.firebaseio.com',
     storageBucket: 'tccalimentracker.appspot.com',
+    iosClientId: '140530809923-epbg5vknld9vvv9da2jjtoumk23j7ees.apps.googleusercontent.com',
     iosBundleId: 'com.example.alimentracker',
   );
 
@@ -82,7 +88,9 @@ class DefaultFirebaseOptions {
     messagingSenderId: '140530809923',
     projectId: 'tccalimentracker',
     authDomain: 'tccalimentracker.firebaseapp.com',
+    databaseURL: 'https://tccalimentracker-default-rtdb.firebaseio.com',
     storageBucket: 'tccalimentracker.appspot.com',
     measurementId: 'G-FHQ1NKFVLV',
   );
+
 }

@@ -1,4 +1,5 @@
 import 'package:alimentracker/auth.dart';
+import 'package:alimentracker/screens/food_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -79,12 +80,15 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: _title(),
+        actions: [IconButton(onPressed: signOut, icon: Icon(Icons.logout),),]
       ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context)=> FoodListScreen()));
+        },
         child: Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
