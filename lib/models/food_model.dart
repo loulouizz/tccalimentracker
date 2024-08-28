@@ -4,8 +4,7 @@ class FoodModel {
   double protein;
   double carbohydrate;
   double fat;
-  double fiber;
-  double sodium;
+  double? amount;
 
   FoodModel({
     required this.name,
@@ -13,8 +12,7 @@ class FoodModel {
     required this.protein,
     required this.carbohydrate,
     required this.fat,
-    required this.fiber,
-    required this.sodium,
+    this.amount
   });
 
   Map<String, dynamic> toJson() {
@@ -24,8 +22,6 @@ class FoodModel {
       'protein': protein,
       'carbohydrate': carbohydrate,
       'fat': fat,
-      'fiber': fiber,
-      'sodium': sodium,
     };
   }
 
@@ -36,8 +32,6 @@ class FoodModel {
       protein: json['protein'],
       carbohydrate: json['carbohydrate'],
       fat: json['fat'],
-      fiber: json['fiber'],
-      sodium: json['sodium'],
     );
   }
 }
