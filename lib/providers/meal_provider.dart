@@ -29,4 +29,9 @@ class MealProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void clearFoods() {
+    _foods.clear();
+    notifyListeners();
+  }
 }

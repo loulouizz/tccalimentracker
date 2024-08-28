@@ -1,7 +1,7 @@
 import 'package:alimentracker/auth.dart';
 import 'package:alimentracker/screens/add_meal_screen.dart';
-import 'package:alimentracker/screens/food_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -13,17 +13,15 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  var dayAndMonth;
-
+  String dayAndMonth = '';
   int _selectedIndex = 1;
+  final User? user = Auth().currentUser;
 
   @override
   void initState() {
-    dayAndMonth = DateFormat('d/0M').format(DateTime.now());
     super.initState();
+    dayAndMonth = DateFormat('d/MM').format(DateTime.now());
   }
-
-  final User? user = Auth().currentUser;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -36,77 +34,105 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _title() {
-    return Text("${dayAndMonth}");
-  }
-
-  Widget _userId() {
-    return Text(user?.email ?? 'User email');
-  }
-
-  Widget _signOutButton() {
-    return ElevatedButton(onPressed: signOut, child: const Text('Sign out'));
-  }
-
-  Widget _historyPage() {
-    return Placeholder();
+    return Text(dayAndMonth);
   }
 
   Widget mainPage() {
+    final todayDate = DateFormat('dd/MM/yyyy').format(DateTime.now());
+
     return Column(
       children: [
-        Text("300 kcal"),
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(user?.uid)
+                .collection('meals')
+                .where('data', isEqualTo: todayDate)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshot.hasError) {
+                return Center(child: Text('Erro ao carregar as refeições.'));
+              }
+
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Center(child: Text('Nenhuma refeição registrada para hoje.'));
+              }
+
+              final meals = snapshot.data!.docs;
+
+              return ListView.builder(
+                itemCount: meals.length,
+                itemBuilder: (context, index) {
+                  final mealData = meals[index].data() as Map<String, dynamic>;
+
+                  final mealName = mealData['nome'] ?? 'Nome não disponível';
+                  final mealTime = mealData['horário'] ?? 'Horário não disponível';
+                  final kcal = mealData['calorias'] ?? 0.0;
+
+                  return ListTile(
+                    title: Text(mealName),
+                    subtitle: Text('Horário: $mealTime\nCalorias: ${kcal.toStringAsFixed(2)} kcal'),
+                  );
+                },
+              );
+            },
+          ),
+        ),
       ],
     );
   }
 
-  Widget _profilePage() {
-    return Placeholder();
-  }
-
-  List<Widget> _widgetOptions = <Widget>[
-    Text("Tela de histórico"),
-
-    Column(
-      children: [
-        Text("300 kcal"),
-      ],
-    ),
-
-    Text("Tela de perfil"),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    List<Widget> _widgetOptions = <Widget>[
+      Placeholder(),
+      mainPage(),
+      Placeholder(),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: _title(),
-        actions: [IconButton(onPressed: signOut, icon: Icon(Icons.logout),),]
+        actions: [
+          IconButton(
+            onPressed: signOut,
+            icon: Icon(Icons.logout),
+          ),
+        ],
       ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context)=> AddMealScreen()));
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => AddMealScreen()),
+          );
         },
         child: Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        items: [
+        items: const [
           BottomNavigationBarItem(
-              label: "Histórico",
-              icon: Icon(
-                Icons.calendar_month,
-              )),
+            label: "Histórico",
+            icon: Icon(Icons.calendar_month),
+          ),
           BottomNavigationBarItem(
-              label: "Início",
-              icon: Icon(
-                Icons.home,
-              )),
-          BottomNavigationBarItem(label: "Perfil", icon: Icon(Icons.person)),
+            label: "Início",
+            icon: Icon(Icons.home),
+          ),
+          BottomNavigationBarItem(
+            label: "Perfil",
+            icon: Icon(Icons.person),
+          ),
         ],
       ),
     );
