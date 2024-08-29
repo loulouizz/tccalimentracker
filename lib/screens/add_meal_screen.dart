@@ -53,11 +53,22 @@ class _AddMealScreenState extends State<AddMealScreen> {
     double totalCarbs = 0;
     double totalFat = 0;
 
+    List<Map<String, dynamic>> foods = [];
+
     for (var food in mealProvider.foods) {
       totalKcal += food['kcal'];
       totalProtein += food['proteína'];
       totalCarbs += food['carboidrato'];
       totalFat += food['gordura'];
+
+      foods.add({
+        'nome': food['nome'],
+        'quantidade': food['quantidade'],
+        'kcal': food['kcal'],
+        'proteína': food['proteína'],
+        'carboidrato': food['carboidrato'],
+        'gordura': food['gordura'],
+      });
     }
 
     final mealData = {
@@ -68,6 +79,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
       'proteína': totalProtein,
       'carboidrato': totalCarbs,
       'gordura': totalFat,
+      'foods': foods,
     };
 
     try {

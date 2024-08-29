@@ -7,10 +7,14 @@ import 'package:provider/provider.dart';
 
 class FoodWidget extends StatelessWidget {
   final FoodModel foodModel;
+  final Function(FoodModel updatedFood)? onUpdate;
+  final VoidCallback? onDelete;
 
   const FoodWidget({
     Key? key,
     required this.foodModel,
+    this.onUpdate,
+    this.onDelete,
   }) : super(key: key);
 
   @override
@@ -24,20 +28,15 @@ class FoodWidget extends StatelessWidget {
               final updatedFood = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FoodInfoScreen(foodModel: foodModel, isAdd: false,),
+                  builder: (context) => FoodInfoScreen(
+                    foodModel: foodModel,
+                    isAdd: false,
+                  ),
                 ),
               );
 
-              // Se o alimento foi editado e retornado, faz a atualização
               if (updatedFood != null && updatedFood is FoodModel) {
-                Provider.of<MealProvider>(context, listen: false).updateFood({
-                  'nome': updatedFood.name,
-                  'quantidade': updatedFood.amount,
-                  'kcal': updatedFood.kcal,
-                  'proteína': updatedFood.protein,
-                  'carboidrato': updatedFood.carbohydrate,
-                  'gordura': updatedFood.fat,
-                });
+                onUpdate?.call(updatedFood);
               }
             },
             icon: Icons.edit,
@@ -46,7 +45,7 @@ class FoodWidget extends StatelessWidget {
           ),
           SlidableAction(
             onPressed: (_) {
-              Provider.of<MealProvider>(context, listen: false).removeFoodByName(foodModel.name);
+              onDelete?.call();
             },
             icon: Icons.delete,
             backgroundColor: Colors.red.shade300,
