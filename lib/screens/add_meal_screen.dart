@@ -103,6 +103,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     final mealProvider = Provider.of<MealProvider>(context);
@@ -199,12 +200,14 @@ class _AddMealScreenState extends State<AddMealScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             FloatingActionButton.extended(
+              heroTag: 'addFoodButton',
               onPressed: () => _addFood(context),
               icon: const Icon(Icons.add),
               label: const Text("Adicionar Alimentos"),
             ),
             SizedBox(height: 10),
             FloatingActionButton.extended(
+              heroTag: 'saveMealButton',
               onPressed: () => _saveMeal(context),
               icon: const Icon(Icons.done),
               label: const Text("Salvar refeição"),

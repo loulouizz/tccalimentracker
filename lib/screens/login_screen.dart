@@ -57,8 +57,8 @@ class _LoginScreenState extends State<LoginScreen> {
               Padding(padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    border: Border.all(color: Colors.white),
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border.all(color: Theme.of(context).colorScheme.onSurface,),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
@@ -79,8 +79,8 @@ class _LoginScreenState extends State<LoginScreen> {
               Padding(padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    border: Border.all(color: Colors.white),
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border.all(color: Theme.of(context).colorScheme.onSurface,),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.greenAccent[700],
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Center(child: Text("Entrar", style: GoogleFonts.roboto(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),)),
+                    child: Center(child: Text("Entrar", style: GoogleFonts.roboto(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 18),)),
                   ),
                 ),
               ),

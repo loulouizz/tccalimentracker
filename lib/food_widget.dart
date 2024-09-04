@@ -1,9 +1,7 @@
 import 'package:alimentracker/models/food_model.dart';
-import 'package:alimentracker/providers/meal_provider.dart';
 import 'package:alimentracker/screens/food_info_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:provider/provider.dart';
 
 class FoodWidget extends StatelessWidget {
   final FoodModel foodModel;
@@ -55,7 +53,7 @@ class FoodWidget extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.green[50],
+          color: Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(20),
         ),
         child: ListTile(
@@ -65,12 +63,19 @@ class FoodWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    foodModel.name,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Text(
+                      foodModel.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      maxLines: 1,
+                    ),
                   ),
+                  SizedBox(width: 8),
                   Text(
-                    '${foodModel.kcal} kcal',
+                    '${foodModel.kcal.toStringAsFixed(0)} kcal',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],

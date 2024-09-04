@@ -6,8 +6,14 @@ import 'package:provider/provider.dart';
 class FoodInfoScreen extends StatefulWidget {
   final FoodModel foodModel;
   final bool isAdd;
+  final String? mealId;
 
-  FoodInfoScreen({required this.foodModel, required this.isAdd, super.key});
+  FoodInfoScreen({
+    required this.foodModel,
+    required this.isAdd,
+    this.mealId,
+    super.key,
+  });
 
   @override
   State<FoodInfoScreen> createState() => _FoodInfoScreenState();
@@ -146,6 +152,7 @@ class _FoodInfoScreenState extends State<FoodInfoScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        icon: Icon(widget.isAdd ? Icons.add : Icons.refresh),
         onPressed: () {
           final foodData = {
             'nome': widget.foodModel.name,
@@ -156,20 +163,16 @@ class _FoodInfoScreenState extends State<FoodInfoScreen> {
             'gordura': double.tryParse(_fatEC.text) ?? 0.0,
           };
 
+          final mealProvider = Provider.of<MealProvider>(context, listen: false);
 
-          if(widget.isAdd){
-            Provider.of<MealProvider>(context, listen: false).addFood(foodData);
+          if (widget.isAdd) {
+            mealProvider.addFood(foodData);
             Navigator.of(context).pop();
             Navigator.of(context).pop();
           } else {
-            Provider.of<MealProvider>(context, listen: false).updateFood({
-              'nome': foodData['nome'],
-              'quantidade': foodData['quantidade'],
-              'kcal': foodData['kcal'],
-              'proteína': foodData['proteína'],
-              'carboidrato': foodData['carboidrato'],
-              'gordura': foodData['gordura'],
-            });
+            if (widget.mealId != null) {
+              mealProvider.updateFood(foodData, widget.mealId!);
+            }
             Navigator.of(context).pop();
           }
         },

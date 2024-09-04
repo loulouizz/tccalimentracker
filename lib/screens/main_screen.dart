@@ -23,6 +23,14 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 1;
   final User? user = Auth().currentUser;
 
+  String _formatNumber(dynamic value) {
+    if (value is num) {
+      return value.toStringAsFixed(2);
+    } else {
+      return value?.toString() ?? '0.00';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -91,7 +99,6 @@ class _MainScreenState extends State<MainScreen> {
                       decoration: InputDecoration(labelText: 'Horário'),
                     ),
                     const SizedBox(height: 10),
-                    const Text('Alimentos:'),
                     SizedBox(
                       height: 200,
                       child: foods.isEmpty
@@ -110,33 +117,46 @@ class _MainScreenState extends State<MainScreen> {
                             fat: food['gordura'] ?? 0.0,
                           );
 
-                          return FoodWidget(
-                            foodModel: foodModel,
-                            onUpdate: (updatedFood) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: FoodWidget(
+                              foodModel: foodModel,
+                              onUpdate: (updatedFood) {
+                                setState(() {
+                                  final double factor = updatedFood.amount! / (food['quantidade'] ?? 1);
 
-                              setState(() {
-                                foods[index] = {
-                                  'nome': updatedFood.name,
-                                  'quantidade': updatedFood.amount,
-                                  'kcal': updatedFood.kcal,
-                                  'proteína': updatedFood.protein,
-                                  'carboidrato': updatedFood.carbohydrate,
-                                  'gordura': updatedFood.fat,
-                                };
-                                _recalculateTotals();
-                              });
-                            },
-                            onDelete: () {
-                              setState(() {
-                                foods.removeAt(index);
-                                _recalculateTotals();
-                              });
-                            },
+                                  foods[index] = {
+                                    'nome': updatedFood.name,
+                                    'quantidade': updatedFood.amount,
+                                    'kcal': double.parse((food['kcal'] * factor).toStringAsFixed(2)),
+                                    'proteína': double.parse((food['proteína'] * factor).toStringAsFixed(2)),
+                                    'carboidrato': double.parse((food['carboidrato'] * factor).toStringAsFixed(2)),
+                                    'gordura': double.parse((food['gordura'] * factor).toStringAsFixed(2)),
+                                  };
+                                  _recalculateTotals();
+                                });
+                              },
+
+
+
+                              onDelete: () {
+                                setState(() {
+                                  foods.removeAt(index);
+                                  _recalculateTotals();
+                                });
+                              },
+                            ),
                           );
                         },
                       ),
                     ),
-                    const SizedBox(height: 10),
+
+                  ],
+                ),
+              ),
+              actions: [
+                Column(
+                  children: [
                     ElevatedButton(
                       onPressed: () async {
                         final newFood = await Navigator.push(
@@ -162,39 +182,43 @@ class _MainScreenState extends State<MainScreen> {
                       },
                       child: Text('Adicionar Alimento'),
                     ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text('Cancelar'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(user?.uid)
+                                .collection('meals')
+                                .doc(mealDoc.id)
+                                .update({
+                              'nome': mealNameController.text,
+                              'horário': mealTimeController.text,
+                              'foods': foods,
+                              'calorias': mealData['calorias'],
+                              'proteína': mealData['proteína'],
+                              'carboidrato': mealData['carboidrato'],
+                              'gordura': mealData['gordura'],
+                            });
+
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Refeição atualizada com sucesso!')),
+                            );
+                          },
+                          child: Text('Salvar'),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancelar'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(user?.uid)
-                        .collection('meals')
-                        .doc(mealDoc.id)
-                        .update({
-                      'nome': mealNameController.text,
-                      'horário': mealTimeController.text,
-                      'foods': foods,
-                      'calorias': mealData['calorias'],
-                      'proteína': mealData['proteína'],
-                      'carboidrato': mealData['carboidrato'],
-                      'gordura': mealData['gordura'],
-                    });
-
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Refeição atualizada com sucesso!')),
-                    );
-                  },
-                  child: Text('Salvar'),
-                ),
               ],
+
             );
           },
         );
@@ -319,6 +343,7 @@ class _MainScreenState extends State<MainScreen> {
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'goToAddMealScreenButton',
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => AddMealScreen()),
@@ -347,3 +372,4 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
+
