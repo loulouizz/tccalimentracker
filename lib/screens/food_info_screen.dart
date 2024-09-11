@@ -8,11 +8,11 @@ class FoodInfoScreen extends StatefulWidget {
   final bool isAdd;
   final String? mealId;
 
-  // Ensure mealId is correctly assigned when FoodInfoScreen is instantiated
+
   FoodInfoScreen({
     required this.foodModel,
     required this.isAdd,
-    required this.mealId, // Ensure mealId is marked as required if it must not be null
+    required this.mealId,
     super.key,
   });
 
@@ -32,31 +32,40 @@ class _FoodInfoScreenState extends State<FoodInfoScreen> {
   List<String> measuresList = ["gramas (g)", ""];
 
   void _updateNutritionalValues(String amountText) {
-    final amount = double.tryParse(amountText) ?? 100.0;
-    final factor = amount / 100;
+    double amount = double.tryParse(amountText) ?? 100.0;
+    double factor = amount / 100;
+
+    double base100kcal = (100 * widget.foodModel.kcal) /
+        (widget.foodModel.amount ?? 100.0);
+    double base100protein = (100 * widget.foodModel.protein) /
+        (widget.foodModel.amount ?? 100.0);
+    double base100carbo = (100 * widget.foodModel.carbohydrate) /
+        (widget.foodModel.amount ?? 100.0);
+    double base100fat = (100 * widget.foodModel.fat) /
+        (widget.foodModel.amount ?? 100.0);
 
     setState(() {
-      _kcalEC.text = (widget.foodModel.kcal * factor).toStringAsFixed(2);
-      _proteinEC.text = (widget.foodModel.protein * factor).toStringAsFixed(2);
-      _carbEC.text = (widget.foodModel.carbohydrate * factor).toStringAsFixed(2);
-      _fatEC.text = (widget.foodModel.fat * factor).toStringAsFixed(2);
+      _kcalEC.text = (base100kcal * factor).toStringAsFixed(2);
+      _proteinEC.text = (base100protein * factor).toStringAsFixed(2);
+      _carbEC.text = (base100carbo * factor).toStringAsFixed(2);
+      _fatEC.text = (base100fat * factor).toStringAsFixed(2);
     });
   }
 
   @override
   void initState() {
     super.initState();
+
+    if (widget.isAdd && widget.foodModel.amount == null) {
+      widget.foodModel.amount =
+      100.0;
+    }
+
     _amountEC.text = widget.foodModel.amount?.toString() ?? "100";
-    _kcalEC.text = widget.foodModel.kcal.toString();
-    _proteinEC.text = widget.foodModel.protein.toString();
-    _carbEC.text = widget.foodModel.carbohydrate.toString();
-    _fatEC.text = widget.foodModel.fat.toString();
+    _updateNutritionalValues(_amountEC.text);
 
     dropDownValueMeasures = measuresList[0];
-    print("Received mealId in FoodInfoScreen: ${widget.mealId}");
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +91,9 @@ class _FoodInfoScreenState extends State<FoodInfoScreen> {
                   child: TextFormField(
                     controller: _amountEC,
                     decoration: InputDecoration(labelText: "Quantidade"),
-                    onChanged: _updateNutritionalValues,
+                    onChanged: (value) {
+                      _updateNutritionalValues(value);
+                    },
                     keyboardType: TextInputType.number,
                   ),
                 ),
@@ -90,7 +101,8 @@ class _FoodInfoScreenState extends State<FoodInfoScreen> {
                   flex: 2,
                   child: DropdownButton<String>(
                     value: dropDownValueMeasures,
-                    items: measuresList.map<DropdownMenuItem<String>>((String value) {
+                    items: measuresList.map<DropdownMenuItem<String>>((
+                        String value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(
@@ -178,18 +190,17 @@ class _FoodInfoScreenState extends State<FoodInfoScreen> {
 
           if (widget.isAdd) {
             Provider.of<MealProvider>(context, listen: false).addFood(foodData);
-            Navigator.of(context).pop(updatedFoodModel);
+            Navigator.of(context).pop();
           } else {
             if (widget.mealId != null) {
-              Provider.of<MealProvider>(context, listen: false).updateFood(foodData, widget.mealId!);
+              Provider.of<MealProvider>(context, listen: false).updateFood(
+                  foodData, widget.mealId!);
             }
             Navigator.of(context).pop(updatedFoodModel);
           }
         },
         label: Text(widget.isAdd ? "Adicionar" : "Atualizar"),
       ),
-
     );
   }
 }
-
