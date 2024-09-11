@@ -3,6 +3,7 @@ import 'package:alimentracker/food_widget.dart';
 import 'package:alimentracker/models/food_model.dart';
 import 'package:alimentracker/providers/meal_provider.dart';
 import 'package:alimentracker/screens/add_meal_screen.dart';
+import 'package:alimentracker/screens/food_info_screen.dart';
 import 'package:alimentracker/screens/food_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -99,6 +100,7 @@ class _MainScreenState extends State<MainScreen> {
                       decoration: InputDecoration(labelText: 'Horário'),
                     ),
                     const SizedBox(height: 10),
+                    // Foods ListView
                     SizedBox(
                       height: 200,
                       child: foods.isEmpty
@@ -120,25 +122,34 @@ class _MainScreenState extends State<MainScreen> {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: FoodWidget(
+                              mealId: mealDoc.id,
                               foodModel: foodModel,
-                              onUpdate: (updatedFood) {
-                                setState(() {
-                                  final double factor = updatedFood.amount! / (food['quantidade'] ?? 1);
-
-                                  foods[index] = {
-                                    'nome': updatedFood.name,
-                                    'quantidade': updatedFood.amount,
-                                    'kcal': double.parse((food['kcal'] * factor).toStringAsFixed(2)),
-                                    'proteína': double.parse((food['proteína'] * factor).toStringAsFixed(2)),
-                                    'carboidrato': double.parse((food['carboidrato'] * factor).toStringAsFixed(2)),
-                                    'gordura': double.parse((food['gordura'] * factor).toStringAsFixed(2)),
-                                  };
-                                  _recalculateTotals();
-                                });
+                              onUpdate: (updatedFood) async {
+                                final updatedFoodModel =
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FoodInfoScreen(
+                                      foodModel: updatedFood,
+                                      isAdd: false,
+                                      mealId: mealDoc.id,
+                                    ),
+                                  ),
+                                );
+                                if (updatedFoodModel != null) {
+                                  setState(() {
+                                    foods[index] = {
+                                      'nome': updatedFoodModel.name,
+                                      'quantidade': updatedFoodModel.amount,
+                                      'kcal': updatedFoodModel.kcal,
+                                      'proteína': updatedFoodModel.protein,
+                                      'carboidrato': updatedFoodModel.carbohydrate,
+                                      'gordura': updatedFoodModel.fat,
+                                    };
+                                    _recalculateTotals();
+                                  });
+                                }
                               },
-
-
-
                               onDelete: () {
                                 setState(() {
                                   foods.removeAt(index);
@@ -150,83 +161,51 @@ class _MainScreenState extends State<MainScreen> {
                         },
                       ),
                     ),
-
                   ],
                 ),
               ),
               actions: [
-                Column(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text('Cancelar'),
+                    ),
                     ElevatedButton(
                       onPressed: () async {
-                        final newFood = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FoodListScreen(),
-                          ),
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(user?.uid)
+                            .collection('meals')
+                            .doc(mealDoc.id)
+                            .update({
+                          'nome': mealNameController.text,
+                          'horário': mealTimeController.text,
+                          'foods': foods,
+                          'calorias': mealData['calorias'],
+                          'proteína': mealData['proteína'],
+                          'carboidrato': mealData['carboidrato'],
+                          'gordura': mealData['gordura'],
+                        });
+
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Refeição atualizada com sucesso!')),
                         );
-
-                        if (newFood != null && newFood is FoodModel) {
-                          setState(() {
-                            foods.add({
-                              'nome': newFood.name,
-                              'quantidade': newFood.amount,
-                              'kcal': newFood.kcal,
-                              'proteína': newFood.protein,
-                              'carboidrato': newFood.carbohydrate,
-                              'gordura': newFood.fat,
-                            });
-                            _recalculateTotals();
-                          });
-                        }
                       },
-                      child: Text('Adicionar Alimento'),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text('Cancelar'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () async {
-                            await FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(user?.uid)
-                                .collection('meals')
-                                .doc(mealDoc.id)
-                                .update({
-                              'nome': mealNameController.text,
-                              'horário': mealTimeController.text,
-                              'foods': foods,
-                              'calorias': mealData['calorias'],
-                              'proteína': mealData['proteína'],
-                              'carboidrato': mealData['carboidrato'],
-                              'gordura': mealData['gordura'],
-                            });
-
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Refeição atualizada com sucesso!')),
-                            );
-                          },
-                          child: Text('Salvar'),
-                        ),
-                      ],
+                      child: Text('Salvar'),
                     ),
                   ],
                 ),
               ],
-
             );
           },
         );
       },
     );
+
   }
-
-
 
   Future<void> _deleteMeal(BuildContext context, DocumentSnapshot mealDoc) async {
     try {
@@ -280,11 +259,20 @@ class _MainScreenState extends State<MainScreen> {
                 itemCount: meals.length,
                 itemBuilder: (context, index) {
                   final mealDoc = meals[index];
+
+                  if (mealDoc == null || mealDoc.id.isEmpty) {
+                    print("Meal document is null or has an empty ID.");
+                    return ListTile(
+                      title: Text("Erro ao carregar a refeição"),
+                    );
+                  }
+
                   final mealData = mealDoc.data() as Map<String, dynamic>;
 
+                  print("Loaded meal with ID: ${mealDoc.id}");
+
                   final mealName = mealData['nome'] ?? 'Nome não disponível';
-                  final mealTime =
-                      mealData['horário'] ?? 'Horário não disponível';
+                  final mealTime = mealData['horário'] ?? 'Horário não disponível';
                   final kcal = mealData['calorias'] ?? 0.0;
 
                   return Slidable(
@@ -292,13 +280,21 @@ class _MainScreenState extends State<MainScreen> {
                       motion: StretchMotion(),
                       children: [
                         SlidableAction(
-                          onPressed: (_) => _editMeal(context, mealDoc),
+                          onPressed: (_) {
+                            // Ensure mealDoc is passed correctly to _editMeal
+                            print("Editing meal with ID: ${mealDoc.id}"); // Debug
+                            _editMeal(context, mealDoc);
+                          },
                           icon: Icons.edit,
                           backgroundColor: Colors.orange,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         SlidableAction(
-                          onPressed: (_) => _deleteMeal(context, mealDoc),
+                          onPressed: (_) {
+                            // Ensure mealDoc is passed correctly to _deleteMeal
+                            print("Deleting meal with ID: ${mealDoc.id}"); // Debug
+                            _deleteMeal(context, mealDoc);
+                          },
                           icon: Icons.delete,
                           backgroundColor: Colors.red.shade300,
                           borderRadius: BorderRadius.circular(12),
@@ -319,6 +315,7 @@ class _MainScreenState extends State<MainScreen> {
       ],
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

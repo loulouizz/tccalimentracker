@@ -5,12 +5,14 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 
 class FoodWidget extends StatelessWidget {
   final FoodModel foodModel;
+  final String mealId;
   final Function(FoodModel updatedFood)? onUpdate;
   final VoidCallback? onDelete;
 
   const FoodWidget({
     Key? key,
     required this.foodModel,
+    required this.mealId,
     this.onUpdate,
     this.onDelete,
   }) : super(key: key);
@@ -29,6 +31,7 @@ class FoodWidget extends StatelessWidget {
                   builder: (context) => FoodInfoScreen(
                     foodModel: foodModel,
                     isAdd: false,
+                    mealId: mealId,
                   ),
                 ),
               );
@@ -51,6 +54,7 @@ class FoodWidget extends StatelessWidget {
           ),
         ],
       ),
+      // FoodWidget build method snippet
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primaryContainer,
@@ -85,7 +89,7 @@ class FoodWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('Quantidade: ${foodModel.amount} g'),
+                  Text('Quantidade: ${foodModel.amount?.toStringAsFixed(0) ?? "0"} g'),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -109,6 +113,7 @@ class FoodWidget extends StatelessWidget {
           ),
         ),
       ),
+
     );
   }
 }

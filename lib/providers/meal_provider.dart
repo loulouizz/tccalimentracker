@@ -25,13 +25,7 @@ class MealProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateFood(Map<String, dynamic> updatedFood, String mealId) async {
-    final index = _foods.indexWhere((food) => food['nome'] == updatedFood['nome']);
-    if (index != -1) {
-      _foods[index] = updatedFood;
-      notifyListeners();
-    }
-
+  Future<void> updateFood(Map<String, dynamic> updatedFood, String mealId) async {
     try {
       DocumentSnapshot mealSnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -44,12 +38,10 @@ class MealProvider with ChangeNotifier {
         Map<String, dynamic> mealData = mealSnapshot.data() as Map<String, dynamic>;
         List<Map<String, dynamic>> foods = List<Map<String, dynamic>>.from(mealData['foods'] ?? []);
 
-        // Find and update the food inside the meal
         final foodIndex = foods.indexWhere((food) => food['nome'] == updatedFood['nome']);
         if (foodIndex != -1) {
           foods[foodIndex] = updatedFood;
 
-          // Save updated foods back to Firestore
           await FirebaseFirestore.instance
               .collection('users')
               .doc(userId)
@@ -58,11 +50,15 @@ class MealProvider with ChangeNotifier {
               .update({'foods': foods});
 
           print('Food updated successfully in Firestore.');
+        } else {
+          print('Food not found in the meal.');
         }
       }
     } catch (e) {
       print('Error updating food in Firestore: $e');
     }
+
+    notifyListeners();
   }
 
   void clearFoods() {

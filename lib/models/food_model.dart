@@ -12,7 +12,7 @@ class FoodModel {
     required this.protein,
     required this.carbohydrate,
     required this.fat,
-    this.amount
+    this.amount,
   });
 
   Map<String, dynamic> toJson() {

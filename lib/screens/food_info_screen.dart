@@ -8,10 +8,11 @@ class FoodInfoScreen extends StatefulWidget {
   final bool isAdd;
   final String? mealId;
 
+  // Ensure mealId is correctly assigned when FoodInfoScreen is instantiated
   FoodInfoScreen({
     required this.foodModel,
     required this.isAdd,
-    this.mealId,
+    required this.mealId, // Ensure mealId is marked as required if it must not be null
     super.key,
   });
 
@@ -44,15 +45,18 @@ class _FoodInfoScreenState extends State<FoodInfoScreen> {
 
   @override
   void initState() {
-    _amountEC.text = "100";
-    _kcalEC.text = "${widget.foodModel.kcal}";
-    _proteinEC.text = "${widget.foodModel.protein}";
-    _carbEC.text = "${widget.foodModel.carbohydrate}";
-    _fatEC.text = "${widget.foodModel.fat}";
+    super.initState();
+    _amountEC.text = widget.foodModel.amount?.toString() ?? "100";
+    _kcalEC.text = widget.foodModel.kcal.toString();
+    _proteinEC.text = widget.foodModel.protein.toString();
+    _carbEC.text = widget.foodModel.carbohydrate.toString();
+    _fatEC.text = widget.foodModel.fat.toString();
 
     dropDownValueMeasures = measuresList[0];
-    super.initState();
+    print("Received mealId in FoodInfoScreen: ${widget.mealId}");
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -163,21 +167,29 @@ class _FoodInfoScreenState extends State<FoodInfoScreen> {
             'gordura': double.tryParse(_fatEC.text) ?? 0.0,
           };
 
-          final mealProvider = Provider.of<MealProvider>(context, listen: false);
+          final updatedFoodModel = FoodModel(
+            name: foodData['nome'].toString(),
+            amount: double.parse(foodData['quantidade'].toString()),
+            kcal: double.parse(foodData['kcal'].toString()),
+            protein: double.parse(foodData['proteína'].toString()),
+            carbohydrate: double.parse(foodData['carboidrato'].toString()),
+            fat: double.parse(foodData['gordura'].toString()),
+          );
 
           if (widget.isAdd) {
-            mealProvider.addFood(foodData);
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
+            Provider.of<MealProvider>(context, listen: false).addFood(foodData);
+            Navigator.of(context).pop(updatedFoodModel);
           } else {
             if (widget.mealId != null) {
-              mealProvider.updateFood(foodData, widget.mealId!);
+              Provider.of<MealProvider>(context, listen: false).updateFood(foodData, widget.mealId!);
             }
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(updatedFoodModel);
           }
         },
         label: Text(widget.isAdd ? "Adicionar" : "Atualizar"),
       ),
+
     );
   }
 }
+

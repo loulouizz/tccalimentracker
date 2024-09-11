@@ -108,111 +108,117 @@ class _AddMealScreenState extends State<AddMealScreen> {
   Widget build(BuildContext context) {
     final mealProvider = Provider.of<MealProvider>(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Adicionar refeição"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                TextFormField(
-                  controller: _mealNameController,
-                  decoration: const InputDecoration(
-                    labelText: "Nome da refeição",
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "O nome da refeição é obrigatório";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Flexible(
-                      child: TextFormField(
-                        controller: _timeController,
-                        decoration: const InputDecoration(
-                          labelText: "Horário",
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "O horário é obrigatório";
-                          }
-                          return null;
-                        },
-                      ),
+    return PopScope(
+      onPopInvoked: (_)=> {
+      mealProvider.clearFoods()
+    },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Adicionar refeição"),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    controller: _mealNameController,
+                    decoration: const InputDecoration(
+                      labelText: "Nome da refeição",
                     ),
-                    const SizedBox(width: 10),
-                    IconButton(
-                      onPressed: () async {
-                        final pickedTime = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay.now(),
-                        );
-                        if (pickedTime != null) {
-                          setState(() {
-                            _timeController.text = pickedTime.format(context);
-                          });
-                        }
-                      },
-                      icon: const Icon(Icons.timer_outlined),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: mealProvider.foods.length,
-                    itemBuilder: (context, index) {
-                      final food = mealProvider.foods[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: FoodWidget(
-                          foodModel: FoodModel(
-                            name: food['nome'],
-                            amount: food['quantidade'],
-                            kcal: food['kcal'],
-                            protein: food['proteína'],
-                            carbohydrate: food['carboidrato'],
-                            fat: food['gordura'],
-                          ),
-                        ),
-                      );
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "O nome da refeição é obrigatório";
+                      }
+                      return null;
                     },
                   ),
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: TextFormField(
+                          controller: _timeController,
+                          decoration: const InputDecoration(
+                            labelText: "Horário",
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "O horário é obrigatório";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      IconButton(
+                        onPressed: () async {
+                          final pickedTime = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.now(),
+                          );
+                          if (pickedTime != null) {
+                            setState(() {
+                              _timeController.text = pickedTime.format(context);
+                            });
+                          }
+                        },
+                        icon: const Icon(Icons.timer_outlined),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: mealProvider.foods.length,
+                      itemBuilder: (context, index) {
+                        final food = mealProvider.foods[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: FoodWidget(
+                            mealId: "",
+                            foodModel: FoodModel(
+                              name: food['nome'],
+                              amount: food['quantidade'],
+                              kcal: food['kcal'],
+                              protein: food['proteína'],
+                              carbohydrate: food['carboidrato'],
+                              fat: food['gordura'],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            FloatingActionButton.extended(
-              heroTag: 'addFoodButton',
-              onPressed: () => _addFood(context),
-              icon: const Icon(Icons.add),
-              label: const Text("Adicionar Alimentos"),
-            ),
-            SizedBox(height: 10),
-            FloatingActionButton.extended(
-              heroTag: 'saveMealButton',
-              onPressed: () => _saveMeal(context),
-              icon: const Icon(Icons.done),
-              label: const Text("Salvar refeição"),
-            ),
-          ],
+        floatingActionButton: Padding(
+          padding: EdgeInsets.only(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              FloatingActionButton.extended(
+                heroTag: 'addFoodButton',
+                onPressed: () => _addFood(context),
+                icon: const Icon(Icons.add),
+                label: const Text("Adicionar Alimentos"),
+              ),
+              SizedBox(height: 10),
+              FloatingActionButton.extended(
+                heroTag: 'saveMealButton',
+                onPressed: () => _saveMeal(context),
+                icon: const Icon(Icons.done),
+                label: const Text("Salvar refeição"),
+              ),
+            ],
+          ),
         ),
       ),
     );

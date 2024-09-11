@@ -104,6 +104,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
                             builder: (context) => FoodInfoScreen(
                               foodModel: foodModel,
                               isAdd: true,
+                              mealId: "",
                             ),
                           ),
                         );
