@@ -113,7 +113,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       color: Colors.greenAccent[700],
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Center(child: Text("Cadastrar", style: GoogleFonts.roboto(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 18),)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Center(child: Text("Continuar com o cadastro", style: GoogleFonts.roboto(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 18),)),
+                        Icon(Icons.arrow_forward, color: Theme.of(context).buttonTheme.colorScheme!.onPrimary,),
+                      ],
+                    ),
                   ),
                 ),
               ),
