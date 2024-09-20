@@ -1,16 +1,14 @@
 import 'package:alimentracker/auth.dart';
 import 'package:alimentracker/food_widget.dart';
 import 'package:alimentracker/models/food_model.dart';
-import 'package:alimentracker/providers/meal_provider.dart';
 import 'package:alimentracker/screens/add_meal_screen.dart';
 import 'package:alimentracker/screens/food_info_screen.dart';
-import 'package:alimentracker/screens/food_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 
 class MainScreen extends StatefulWidget {
   MainScreen({super.key});
@@ -231,6 +229,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return Column(
       children: [
+
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
@@ -253,61 +252,135 @@ class _MainScreenState extends State<MainScreen> {
                     child: Text('Nenhuma refeição registrada para hoje.'));
               }
 
+              final kcalSum = snapshot.data!.docs
+                  .map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                return (data['calorias'] as num?) ?? 0;
+              }).reduce((value, element) => value + element);
+
+              final proteinSum = snapshot.data!.docs
+                  .map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                return (data['proteína'] as num?) ?? 0;
+              }).reduce((value, element) => value + element);
+
+              final carbSum = snapshot.data!.docs
+                  .map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                return (data['carboidrato'] as num?) ?? 0;
+              }).reduce((value, element) => value + element);
+
+              final fatSum = snapshot.data!.docs
+                  .map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                return (data['gordura'] as num?) ?? 0;
+              }).reduce((value, element) => value + element);
+
+
               final meals = snapshot.data!.docs;
 
-              return ListView.builder(
-                itemCount: meals.length,
-                itemBuilder: (context, index) {
-                  final mealDoc = meals[index];
-
-                  if (mealDoc == null || mealDoc.id.isEmpty) {
-                    print("Meal document is null or has an empty ID.");
-                    return ListTile(
-                      title: Text("Erro ao carregar a refeição"),
-                    );
-                  }
-
-                  final mealData = mealDoc.data() as Map<String, dynamic>;
-
-                  print("Loaded meal with ID: ${mealDoc.id}");
-
-                  final mealName = mealData['nome'] ?? 'Nome não disponível';
-                  final mealTime = mealData['horário'] ?? 'Horário não disponível';
-                  final kcal = mealData['calorias'] ?? 0.0;
-
-                  return Slidable(
-                    endActionPane: ActionPane(
-                      motion: StretchMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (_) {
-                            // Ensure mealDoc is passed correctly to _editMeal
-                            print("Editing meal with ID: ${mealDoc.id}"); // Debug
-                            _editMeal(context, mealDoc);
-                          },
-                          icon: Icons.edit,
-                          backgroundColor: Colors.orange,
-                          borderRadius: BorderRadius.circular(12),
+              return Column(
+                children: [
+                  const Text("Kcal"),
+                  SizedBox(height: 6,),
+                  Row(
+                    children: [
+                      Text("Protein:"),
+                      Expanded(
+                        child: LinearPercentIndicator(
+                          barRadius: Radius.circular(60),
+                          lineHeight: 18,
+                          center: new Text("$kcalSum / Protein"),
+                          progressColor: Colors.red,
+                          percent: proteinSum/200,
                         ),
-                        SlidableAction(
-                          onPressed: (_) {
-                            // Ensure mealDoc is passed correctly to _deleteMeal
-                            print("Deleting meal with ID: ${mealDoc.id}"); // Debug
-                            _deleteMeal(context, mealDoc);
-                          },
-                          icon: Icons.delete,
-                          backgroundColor: Colors.red.shade300,
-                          borderRadius: BorderRadius.circular(12),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 6,),
+                  Row(
+                    children: [
+                      Text("Carb:"),
+                      Expanded(
+                        child: LinearPercentIndicator(
+                          barRadius: Radius.circular(60),
+                          lineHeight: 18,
+                          center: new Text("$carbSum / Carb"),
+                          progressColor: Colors.red,
+                          percent: carbSum/200,
                         ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 6,),
+                  LinearPercentIndicator(
+                    barRadius: Radius.circular(60),
+                    lineHeight: 18,
+                    center: new Text("$kcalSum / Fat"),
+                    progressColor: Colors.red,
+                    percent: kcalSum/200,
+                  ),
+
+                  SizedBox(height: 20,),
+
+
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: meals.length,
+                      itemBuilder: (context, index) {
+                        final mealDoc = meals[index];
+                    
+                        if (mealDoc == null || mealDoc.id.isEmpty) {
+                          print("Meal document is null or has an empty ID.");
+                          return ListTile(
+                            title: Text("Erro ao carregar a refeição"),
+                          );
+                        }
+                    
+                        final mealData = mealDoc.data() as Map<String, dynamic>;
+                    
+                        print("Loaded meal with ID: ${mealDoc.id}");
+                    
+                        final mealName = mealData['nome'] ?? 'Nome não disponível';
+                        final mealTime = mealData['horário'] ?? 'Horário não disponível';
+                        final kcal = mealData['calorias'] ?? 0.0;
+                    
+                        return Slidable(
+                          endActionPane: ActionPane(
+                            motion: StretchMotion(),
+                            children: [
+                              SlidableAction(
+                                onPressed: (_) {
+                                  print("Editing meal with ID: ${mealDoc.id}");
+                                  _editMeal(context, mealDoc);
+                                },
+                                icon: Icons.edit,
+                                backgroundColor: Colors.orange,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              SlidableAction(
+                                onPressed: (_) {
+                                  print("Deleting meal with ID: ${mealDoc.id}");
+                                  _deleteMeal(context, mealDoc);
+                                },
+                                icon: Icons.delete,
+                                backgroundColor: Colors.red.shade300,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            tileColor: Theme.of(context).colorScheme.primaryContainer,
+                            title: Text(mealName),
+                            subtitle: Text(
+                                'Horário: $mealTime\nCalorias: ${kcal.toStringAsFixed(2)} kcal'),
+                          ),
+                        );
+                      },
                     ),
-                    child: ListTile(
-                      title: Text(mealName),
-                      subtitle: Text(
-                          'Horário: $mealTime\nCalorias: ${kcal.toStringAsFixed(2)} kcal'),
-                    ),
-                  );
-                },
+                  ),
+                ],
               );
             },
           ),
@@ -315,7 +388,6 @@ class _MainScreenState extends State<MainScreen> {
       ],
     );
   }
-
 
   @override
   Widget build(BuildContext context) {

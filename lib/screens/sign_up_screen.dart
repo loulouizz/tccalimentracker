@@ -20,6 +20,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   String? _selectedGender;
   String? _selectedGoal;
+  String? _selectedActivityLevel;
 
   Future<void> createUserWithEmailAndPassword() async {
     try {
@@ -158,6 +159,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   onChanged: (value) {
                     setState(() {
                       _selectedGoal = value;
+                    });
+                  },
+                ),
+                const SizedBox(height: 10),
+                _buildDropdown<String>(
+                  hintText: "Nível de atividade física",
+                  value: _selectedActivityLevel,
+                  items: ["Sedentário (menos de 10min/semana)", "Irregularmente ativo", "Ativo(150min/semana)", "Muito ativo(300min/semana)"],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedActivityLevel = value;
                     });
                   },
                 ),

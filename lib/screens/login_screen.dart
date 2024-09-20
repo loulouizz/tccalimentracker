@@ -29,12 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Widget _title() {
-    return const Text('Firebase Auth');
-  }
-
-
-
   Widget _errorMessage() {
     return Column(
       children: [Text(errorMessage == '' ? '' : 'Hmm? $errorMessage'),

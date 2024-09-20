@@ -25,19 +25,21 @@ class Auth {
     required String gender,
     required String goal,
   }) async {
-    UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email, password: password);
+    UserCredential userCredential = await _firebaseAuth
+        .createUserWithEmailAndPassword(email: email, password: password);
 
     String uid = userCredential.user!.uid;
 
-    await _firestore.collection('users').doc(uid).set({
-      'email': email,
-      'height': height,
-      'weight': weight,
-      'gender': gender,
-      'goal': goal,
-      'createdAt': Timestamp.now(),
-    });
+    await _firestore.collection('users').doc(uid).set(
+      {
+        'email': email,
+        'height': height,
+        'weight': weight,
+        'gender': gender,
+        'goal': goal,
+        'createdAt': Timestamp.now(),
+      },
+    );
   }
 
   Future<void> signOut() async {
