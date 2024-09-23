@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
@@ -281,47 +282,82 @@ class _MainScreenState extends State<MainScreen> {
 
               return Column(
                 children: [
-                  const Text("Kcal"),
-                  SizedBox(height: 6,),
-                  Row(
-                    children: [
-                      Text("Protein:"),
-                      Expanded(
-                        child: LinearPercentIndicator(
-                          barRadius: Radius.circular(60),
-                          lineHeight: 18,
-                          center: new Text("$kcalSum / Protein"),
-                          progressColor: Colors.red,
-                          percent: proteinSum/200,
+                  Text("${kcalSum.toStringAsFixed(0)} / Kcal", style: GoogleFonts.lato(),),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Proteína"),
+                                  Text("$proteinSum/200g"),
+                                ],
+                              ),
+                            ),
+                            LinearPercentIndicator(
+                              barRadius: Radius.circular(60),
+                              lineHeight: 10,
+                              progressColor: Theme.of(context).colorScheme.tertiaryContainer,
+                              percent: proteinSum/200,
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 6,),
-                  Row(
-                    children: [
-                      Text("Carb:"),
-                      Expanded(
-                        child: LinearPercentIndicator(
-                          barRadius: Radius.circular(60),
-                          lineHeight: 18,
-                          center: new Text("$carbSum / Carb"),
-                          progressColor: Colors.red,
-                          percent: carbSum/200,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 6,),
-                  LinearPercentIndicator(
-                    barRadius: Radius.circular(60),
-                    lineHeight: 18,
-                    center: new Text("$kcalSum / Fat"),
-                    progressColor: Colors.red,
-                    percent: kcalSum/200,
-                  ),
+                        SizedBox(height: 6,),
 
-                  SizedBox(height: 20,),
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Carboidrato"),
+                                  Text("$carbSum/200g"),
+                                ],
+                              ),
+                            ),
+                            LinearPercentIndicator(
+                              barRadius: Radius.circular(60),
+                              lineHeight: 10,
+                              progressColor: Theme.of(context).colorScheme.tertiaryContainer,
+                              percent: proteinSum/200,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 6,),
+
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Gordura"),
+                                  Text("$fatSum/200g"),
+                                ],
+                              ),
+                            ),
+                            LinearPercentIndicator(
+                              barRadius: Radius.circular(60),
+                              lineHeight: 10,
+                              progressColor: Theme.of(context).colorScheme.tertiaryContainer,
+                              percent: proteinSum/200,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 6,),
+
+                        SizedBox(height: 20,),
+
+                      ],
+                    ),
+                  ),
 
 
                   Expanded(
