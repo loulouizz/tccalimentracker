@@ -17,21 +17,114 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _passwordEC = TextEditingController();
   final TextEditingController _heightEC = TextEditingController();
   final TextEditingController _weightEC = TextEditingController();
+  final TextEditingController _ageEC = TextEditingController();
 
   String? _selectedGender;
   String? _selectedGoal;
   String? _selectedActivityLevel;
 
+  double calculateTMB(double weight, double height, int age, String gender) {
+    if (gender == "Masculino") {
+      return 88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age);
+    } else {
+      return 447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age);
+    }
+  }
+
+  double adjustTMBForActivity(double tmb, String activityLevel) {
+    switch (activityLevel) {
+      case "Sedentário (Pouca ou nenhuma atividade física)":
+        return tmb * 1.2;
+      case "Levemente ativo (Exercício leve 1-3 dias/semana)":
+        return tmb * 1.375;
+      case "Moderadamente ativo (Exercício moderado 3-5 dias/semana)":
+        return tmb * 1.55;
+      case "Muito ativo (Exercício intenso 6-7 dias/semana)":
+        return tmb * 1.725;
+      case "Extremamente ativo (Atividade física intensa diária)":
+        return tmb * 1.9;
+      default:
+        return tmb;
+    }
+  }
+
+
+  double calculateAdjustedCalories(double tmb, String goal) {
+    switch (goal) {
+      case "Ganhar massa":
+        return tmb * 1.15;
+      case "Perder peso":
+        return tmb * 0.85;
+      case "Manter peso":
+      default:
+        return tmb;
+    }
+  }
+
+  Map<String, double> calculateMacronutrients(double calories, String goal) {
+    double proteinPercentage;
+    double carbsPercentage;
+    double fatPercentage;
+
+    switch (goal) {
+      case "Ganhar massa":
+        proteinPercentage = 0.30;
+        carbsPercentage = 0.50;
+        fatPercentage = 0.20;
+        break;
+      case "Perder peso":
+        proteinPercentage = 0.35;
+        carbsPercentage = 0.40;
+        fatPercentage = 0.25;
+        break;
+      case "Manter peso":
+      default:
+        proteinPercentage = 0.25;
+        carbsPercentage = 0.50;
+        fatPercentage = 0.25;
+        break;
+    }
+
+    double proteinCalories = calories * proteinPercentage;
+    double carbsCalories = calories * carbsPercentage;
+    double fatCalories = calories * fatPercentage;
+
+    double proteinGrams = proteinCalories / 4;
+    double carbsGrams = carbsCalories / 4;
+    double fatGrams = fatCalories / 9;
+
+    return {
+      'Proteínas (g)': proteinGrams,
+      'Carboidratos (g)': carbsGrams,
+      'Gorduras (g)': fatGrams,
+    };
+  }
+
   Future<void> createUserWithEmailAndPassword() async {
     try {
+      double height = double.parse(_heightEC.text);
+      double weight = double.parse(_weightEC.text);
+      int age = int.parse(_ageEC.text);
+
+      double tmb = calculateTMB(weight, height, age, _selectedGender!);
+      tmb = adjustTMBForActivity(tmb, _selectedActivityLevel!);
+
+      double adjustedCalories = calculateAdjustedCalories(tmb, _selectedGoal!);
+
+      Map<String, double> macronutrients = calculateMacronutrients(adjustedCalories, _selectedGoal!);
+
       await Auth().createUserWithEmailAndPassword(
         email: _emailEC.text,
         password: _passwordEC.text,
-        height: double.parse(_heightEC.text),
-        weight: double.parse(_weightEC.text),
+        height: height,
+        weight: weight,
         gender: _selectedGender!,
         goal: _selectedGoal!,
+        tmb: tmb,
+        calories: adjustedCalories,
+        macronutrients: macronutrients,
       );
+
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Cadastro realizado com sucesso")));
       Navigator.of(context).pop();
@@ -141,6 +234,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 10),
                 _buildTextField(controller: _weightEC, hintText: "Peso (kg)"),
                 const SizedBox(height: 10),
+                _buildTextField(controller: _ageEC, hintText: "Idade"),
+                const SizedBox(height: 10),
                 _buildDropdown<String>(
                   hintText: "Gênero",
                   value: _selectedGender,
@@ -166,7 +261,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 _buildDropdown<String>(
                   hintText: "Nível de atividade física",
                   value: _selectedActivityLevel,
-                  items: ["Sedentário (menos de 10min/semana)", "Irregularmente ativo", "Ativo(150min/semana)", "Muito ativo(300min/semana)"],
+                  items: [
+                  "Sedentário (Pouca ou nenhuma atividade física)",
+                  "Levemente ativo (Exercício leve 1-3 dias/semana)",
+                  "Moderadamente ativo (Exercício moderado 3-5 dias/semana)",
+                  "Muito ativo (Exercício intenso 6-7 dias/semana)",
+                  "Extremamente ativo (Atividade física intensa diária)"
+                  ],
                   onChanged: (value) {
                     setState(() {
                       _selectedActivityLevel = value;

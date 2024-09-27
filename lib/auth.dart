@@ -24,6 +24,9 @@ class Auth {
     required double weight,
     required String gender,
     required String goal,
+    required double tmb,
+    required double calories,
+    required Map<String, double> macronutrients,
   }) async {
     UserCredential userCredential = await _firebaseAuth
         .createUserWithEmailAndPassword(email: email, password: password);
@@ -37,10 +40,14 @@ class Auth {
         'weight': weight,
         'gender': gender,
         'goal': goal,
+        'tmb': tmb,
+        'calories': calories,
+        'macronutrients': macronutrients,
         'createdAt': Timestamp.now(),
       },
     );
   }
+
 
   Future<void> signOut() async {
     await _firebaseAuth.signOut();

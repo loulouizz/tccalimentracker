@@ -23,6 +23,11 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 1;
   final User? user = Auth().currentUser;
 
+  double dailyCalories = 0;
+  double dailyProtein = 0;
+  double dailyCarbs = 0;
+  double dailyFat = 0;
+
   String _formatNumber(dynamic value) {
     if (value is num) {
       return value.toStringAsFixed(2);
@@ -35,6 +40,29 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     dayAndMonth = DateFormat('d/MM').format(DateTime.now());
+    _loadUserNutritionalGoals();
+  }
+
+  Future<void> _loadUserNutritionalGoals() async {
+    try {
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user?.uid)
+          .get();
+
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+
+        setState(() {
+          dailyCalories = userData['calories'] ?? 0;
+          dailyProtein = userData['macronutrients']['Proteínas (g)'] ?? 0;
+          dailyCarbs = userData['macronutrients']['Carboidratos (g)'] ?? 0;
+          dailyFat = userData['macronutrients']['Gorduras (g)'] ?? 0;
+        });
+      }
+    } catch (e) {
+      print('Erro ao carregar metas nutricionais: $e');
+    }
   }
 
   void _onItemTapped(int index) {
@@ -230,7 +258,6 @@ class _MainScreenState extends State<MainScreen> {
 
     return Column(
       children: [
-
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
@@ -249,145 +276,67 @@ class _MainScreenState extends State<MainScreen> {
               }
 
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return Center(
-                    child: Text('Nenhuma refeição registrada para hoje.'));
+                return Column(
+                  children: [
+                    Text("0 / ${dailyCalories.toStringAsFixed(0)} Kcal", style: GoogleFonts.lato(fontSize: 48)),
+                    _buildNutrientProgressBars(0, 0, 0),
+                    Center(child: Text('Nenhuma refeição registrada para hoje.')),
+                  ],
+                );
               }
 
+              // Somar as calorias e macronutrientes das refeições do dia
               final kcalSum = snapshot.data!.docs
                   .map((doc) {
                 final data = doc.data() as Map<String, dynamic>;
-                return (data['calorias'] as num?) ?? 0;
-              }).reduce((value, element) => value + element);
+                return (data['calorias'] as double?) ?? 0;
+              })
+                  .reduce((value, element) => value + element);
 
               final proteinSum = snapshot.data!.docs
                   .map((doc) {
                 final data = doc.data() as Map<String, dynamic>;
-                return (data['proteína'] as num?) ?? 0;
-              }).reduce((value, element) => value + element);
+                return (data['proteína'] as double?) ?? 0;
+              })
+                  .reduce((value, element) => value + element);
 
               final carbSum = snapshot.data!.docs
                   .map((doc) {
                 final data = doc.data() as Map<String, dynamic>;
-                return (data['carboidrato'] as num?) ?? 0;
-              }).reduce((value, element) => value + element);
+                return (data['carboidrato'] as double?) ?? 0;
+              })
+                  .reduce((value, element) => value + element);
 
               final fatSum = snapshot.data!.docs
                   .map((doc) {
                 final data = doc.data() as Map<String, dynamic>;
-                return (data['gordura'] as num?) ?? 0;
-              }).reduce((value, element) => value + element);
-
-
-              final meals = snapshot.data!.docs;
+                return (data['gordura'] as double?) ?? 0;
+              })
+                  .reduce((value, element) => value + element);
 
               return Column(
                 children: [
-                  Text("${kcalSum.toStringAsFixed(0)} / Kcal", style: GoogleFonts.lato(),),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Proteína"),
-                                  Text("$proteinSum/200g"),
-                                ],
-                              ),
-                            ),
-                            LinearPercentIndicator(
-                              barRadius: Radius.circular(60),
-                              lineHeight: 10,
-                              progressColor: Theme.of(context).colorScheme.tertiaryContainer,
-                              percent: proteinSum/200,
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 6,),
-
-                        Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Carboidrato"),
-                                  Text("$carbSum/200g"),
-                                ],
-                              ),
-                            ),
-                            LinearPercentIndicator(
-                              barRadius: Radius.circular(60),
-                              lineHeight: 10,
-                              progressColor: Theme.of(context).colorScheme.tertiaryContainer,
-                              percent: proteinSum/200,
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 6,),
-
-                        Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Gordura"),
-                                  Text("$fatSum/200g"),
-                                ],
-                              ),
-                            ),
-                            LinearPercentIndicator(
-                              barRadius: Radius.circular(60),
-                              lineHeight: 10,
-                              progressColor: Theme.of(context).colorScheme.tertiaryContainer,
-                              percent: proteinSum/200,
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 6,),
-
-                        SizedBox(height: 20,),
-
-                      ],
-                    ),
-                  ),
-
-
+                  // Exibe calorias consumidas comparadas com a meta
+                  Text("${kcalSum.toStringAsFixed(0)} / ${dailyCalories.toStringAsFixed(0)} Kcal",
+                      style: GoogleFonts.lato(fontSize: 48)),
+                  // Exibe as barras de progresso para os macronutrientes
+                  _buildNutrientProgressBars(proteinSum, carbSum, fatSum),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: meals.length,
+                      itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
-                        final mealDoc = meals[index];
-                    
-                        if (mealDoc == null || mealDoc.id.isEmpty) {
-                          print("Meal document is null or has an empty ID.");
-                          return ListTile(
-                            title: Text("Erro ao carregar a refeição"),
-                          );
-                        }
-                    
+                        final mealDoc = snapshot.data!.docs[index];
                         final mealData = mealDoc.data() as Map<String, dynamic>;
-                    
-                        print("Loaded meal with ID: ${mealDoc.id}");
-                    
                         final mealName = mealData['nome'] ?? 'Nome não disponível';
                         final mealTime = mealData['horário'] ?? 'Horário não disponível';
                         final kcal = mealData['calorias'] ?? 0.0;
-                    
+
                         return Slidable(
                           endActionPane: ActionPane(
                             motion: StretchMotion(),
                             children: [
                               SlidableAction(
                                 onPressed: (_) {
-                                  print("Editing meal with ID: ${mealDoc.id}");
                                   _editMeal(context, mealDoc);
                                 },
                                 icon: Icons.edit,
@@ -396,7 +345,6 @@ class _MainScreenState extends State<MainScreen> {
                               ),
                               SlidableAction(
                                 onPressed: (_) {
-                                  print("Deleting meal with ID: ${mealDoc.id}");
                                   _deleteMeal(context, mealDoc);
                                 },
                                 icon: Icons.delete,
@@ -409,8 +357,7 @@ class _MainScreenState extends State<MainScreen> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                             tileColor: Theme.of(context).colorScheme.primaryContainer,
                             title: Text(mealName),
-                            subtitle: Text(
-                                'Horário: $mealTime\nCalorias: ${kcal.toStringAsFixed(2)} kcal'),
+                            subtitle: Text('Horário: $mealTime\nCalorias: ${kcal.toStringAsFixed(2)} kcal'),
                           ),
                         );
                       },
@@ -424,6 +371,46 @@ class _MainScreenState extends State<MainScreen> {
       ],
     );
   }
+
+  Widget _buildNutrientProgressBars(double proteinSum, double carbSum, double fatSum) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          _buildProgressBar("Proteína", proteinSum, dailyProtein),
+          SizedBox(height: 6),
+          _buildProgressBar("Carboidrato", carbSum, dailyCarbs),
+          SizedBox(height: 6),
+          _buildProgressBar("Gordura", fatSum, dailyFat),
+          SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressBar(String label, double currentAmount, double goalAmount) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label),
+              Text("${currentAmount.toStringAsFixed(2)} / ${goalAmount.toStringAsFixed(2)}g"),
+            ],
+          ),
+        ),
+        LinearPercentIndicator(
+          barRadius: Radius.circular(60),
+          lineHeight: 10,
+          progressColor: Theme.of(context).colorScheme.primary,
+          percent: (goalAmount > 0) ? (currentAmount / goalAmount).clamp(0.0, 1.0) : 0.0,
+        ),
+      ],
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
