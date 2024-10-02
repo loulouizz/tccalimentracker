@@ -3,6 +3,7 @@ import 'package:alimentracker/food_widget.dart';
 import 'package:alimentracker/models/food_model.dart';
 import 'package:alimentracker/screens/add_meal_screen.dart';
 import 'package:alimentracker/screens/food_info_screen.dart';
+import 'package:alimentracker/screens/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -127,7 +128,6 @@ class _MainScreenState extends State<MainScreen> {
                       decoration: InputDecoration(labelText: 'Horário'),
                     ),
                     const SizedBox(height: 10),
-                    // Foods ListView
                     SizedBox(
                       height: 200,
                       child: foods.isEmpty
@@ -285,7 +285,6 @@ class _MainScreenState extends State<MainScreen> {
                 );
               }
 
-              // Somar as calorias e macronutrientes das refeições do dia
               final kcalSum = snapshot.data!.docs
                   .map((doc) {
                 final data = doc.data() as Map<String, dynamic>;
@@ -316,10 +315,8 @@ class _MainScreenState extends State<MainScreen> {
 
               return Column(
                 children: [
-                  // Exibe calorias consumidas comparadas com a meta
                   Text("${kcalSum.toStringAsFixed(0)} / ${dailyCalories.toStringAsFixed(0)} Kcal",
                       style: GoogleFonts.lato(fontSize: 48)),
-                  // Exibe as barras de progresso para os macronutrientes
                   _buildNutrientProgressBars(proteinSum, carbSum, fatSum),
                   Expanded(
                     child: ListView.builder(
@@ -417,7 +414,7 @@ class _MainScreenState extends State<MainScreen> {
     List<Widget> _widgetOptions = <Widget>[
       Placeholder(),
       mainPage(),
-      Placeholder(),
+      ProfileScreen(),
     ];
 
     return Scaffold(
