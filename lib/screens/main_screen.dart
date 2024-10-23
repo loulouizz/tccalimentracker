@@ -422,10 +422,16 @@ class _MainScreenState extends State<MainScreen> {
         centerTitle: true,
         title: _title(),
         actions: [
-          IconButton(
-            onPressed: signOut,
-            icon: Icon(Icons.logout),
-          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text('0', style: GoogleFonts.roboto(fontSize: 20),),
+              IconButton(
+                onPressed: signOut,
+                icon: Icon(Icons.local_fire_department_sharp, color: Colors.orange,),
+              ),
+            ],
+          )
         ],
       ),
       body: Center(
