@@ -23,6 +23,8 @@ class _MainScreenState extends State<MainScreen> {
   String dayAndMonth = '';
   int _selectedIndex = 1;
   final User? user = Auth().currentUser;
+  int? dailyStreak;
+
 
   double dailyCalories = 0;
   double dailyProtein = 0;
@@ -37,60 +39,42 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+
+  _getDailyStreak() async {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user?.uid)
+        .get();
+
+    if (snapshot.exists) {
+      dailyStreak = snapshot.get('dailyStreak');
+    } else {
+      print("Documento não encontrado!");
+    }
+
+    print("Daily Streak: $dailyStreak");
+  }
+
+
   @override
   void initState() {
     super.initState();
     dayAndMonth = DateFormat('d/MM').format(DateTime.now());
     _loadUserNutritionalGoals();
     _checkDailyStreak();
+    _getDailyStreak();
   }
 
   Future<void> _checkDailyStreak() async {
-    try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user?.uid)
-          .get();
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user?.uid)
+        .get();
 
-      if (userDoc.exists) {
-        final userData = userDoc.data() as Map<String, dynamic>;
+    if (userDoc.exists) {
+      final userData = userDoc.data() as Map<String, dynamic>;
 
-        final String? ultimaRefeicao = userData['ultimaRefeicaoCadastrada'];
-        int dailyStreak = userData['dailyStreak'] ?? 0;
-
-        DateTime today = DateTime.now();
-        DateTime yesterday = today.subtract(Duration(days: 1));
-
-        if (ultimaRefeicao == DateFormat('dd/MM/yyyy').format(today)) {
-          setState(() {
-          });
-        } else if (ultimaRefeicao == DateFormat('dd/MM/yyyy').format(yesterday)) {
-          dailyStreak++;
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user?.uid)
-              .update({
-            'dailyStreak': dailyStreak,
-            'ultimaRefeicaoCadastrada': DateFormat('dd/MM/yyyy').format(today),
-          });
-
-          setState(() {
-          });
-        } else {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user?.uid)
-              .update({
-            'dailyStreak': 0,
-            'ultimaRefeicaoCadastrada': DateFormat('dd/MM/yyyy').format(today),
-          });
-
-          setState(() {
-          });
-        }
-      }
-    } catch (e) {
-      print('Erro ao verificar daily streak: $e');
+      dailyStreak = userData['dailyStreak'] ?? 0;
     }
   }
 
@@ -476,7 +460,26 @@ class _MainScreenState extends State<MainScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text('0', style: GoogleFonts.roboto(fontSize: 20),),
+              StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user?.uid)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || !snapshot.data!.exists) {
+                    return Text("Documento não encontrado");
+                  }
+                  var userDoc = snapshot.data!;
+                  var data = userDoc.data() as Map<String, dynamic>;
+                  var dailyStreak = data['dailyStreak'] ?? 0;
+                  return Text("$dailyStreak");
+                },
+              ),
+
+
               IconButton(
                 onPressed: signOut,
                 icon: Icon(Icons.local_fire_department_sharp, color: Colors.orange,),

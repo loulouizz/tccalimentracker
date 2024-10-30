@@ -83,13 +83,15 @@ class _AddMealScreenState extends State<AddMealScreen> {
     };
 
     try {
+      await _updateDailyStreak(user.uid);
+
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .collection('meals')
           .add(mealData);
 
-      await _updateDailyStreak(user.uid);
+
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Refeição salva com sucesso!')),
@@ -106,31 +108,47 @@ class _AddMealScreenState extends State<AddMealScreen> {
   }
 
   Future<void> _updateDailyStreak(String userId) async {
-    final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    if (userDoc.exists) {
-      final userData = userDoc.data() as Map<String, dynamic>;
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
 
-      final String? ultimaRefeicao = userData['ultimaRefeicaoCadastrada'];
-      int dailyStreak = userData['dailyStreak'] ?? 0;
+      if (userDoc.exists) {
+        print("Documento do usuário encontrado!");
 
-      DateTime today = DateTime.now();
-      DateTime yesterday = today.subtract(Duration(days: 1));
+        final Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
 
-      if (ultimaRefeicao == DateFormat('dd/MM/yyyy').format(today)) {
-        return;
-      } else if (ultimaRefeicao == DateFormat('dd/MM/yyyy').format(yesterday)) {
-        dailyStreak++;
+        final String? ultimaRefeicao = userData['ultimaRefeicaoCadastrada'];
+        int dailyStreak = userData['dailyStreak'] ?? 0;
+
+        DateTime today = DateTime.now();
+        DateTime yesterday = today.subtract(Duration(days: 1));
+
+        String formattedToday = DateFormat('dd/MM/yyyy').format(today);
+        String formattedYesterday = DateFormat('dd/MM/yyyy').format(yesterday);
+
+        if (ultimaRefeicao == formattedToday) {
+          print("Streak já atualizado hoje.");
+          return;
+        } else if (ultimaRefeicao == formattedYesterday) {
+          dailyStreak++;
+          print("Streak incrementado para $dailyStreak.");
+        } else {
+          dailyStreak = 1;
+          print("Streak resetado para 1.");
+        }
+
+        await FirebaseFirestore.instance.collection('users').doc(userId).update({
+          'dailyStreak': dailyStreak,
+          'ultimaRefeicaoCadastrada': formattedToday,
+        });
+
+        print("Streak atualizado com sucesso no Firestore.");
       } else {
-        dailyStreak = 1;
+        print("Documento do usuário não encontrado.");
       }
-
-      await FirebaseFirestore.instance.collection('users').doc(userId).update({
-        'dailyStreak': dailyStreak,
-        'ultimaRefeicaoCadastrada': DateFormat('dd/MM/yyyy').format(today),
-      });
+    } catch (e) {
+      print("Erro ao atualizar daily streak: $e");
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final mealProvider = Provider.of<MealProvider>(context);
