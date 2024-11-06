@@ -3,6 +3,7 @@ import 'package:alimentracker/food_widget.dart';
 import 'package:alimentracker/models/food_model.dart';
 import 'package:alimentracker/screens/add_meal_screen.dart';
 import 'package:alimentracker/screens/food_info_screen.dart';
+import 'package:alimentracker/screens/history_screen.dart';
 import 'package:alimentracker/screens/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -447,7 +448,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     List<Widget> _widgetOptions = <Widget>[
-      Placeholder(),
+      HistoryScreen(),
       mainPage(),
       ProfileScreen(),
     ];
