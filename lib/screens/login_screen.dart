@@ -1,4 +1,5 @@
 import 'package:alimentracker/auth.dart';
+import 'package:alimentracker/screens/sign_up_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -125,11 +126,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Não tem conta?", style: GoogleFonts.roboto(fontWeight: FontWeight.bold),),
+                GestureDetector(onTap: (){
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignUpScreen()));
+                }, child: Text(" Crie aqui", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),))
               ],
-            ),
-          ),
-        ),
-      ),
-    );
+            )])))));
+
+
+
   }
 }
