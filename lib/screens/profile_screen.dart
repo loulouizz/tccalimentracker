@@ -12,7 +12,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final User? user = FirebaseAuth.instance.currentUser;
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _genderController = TextEditingController();
   final TextEditingController _goalController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
@@ -22,6 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _proteinController = TextEditingController();
   final TextEditingController _tmbController = TextEditingController();
 
+  String? _selectedGender;
   bool isLoading = true;
 
   @override
@@ -42,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         setState(() {
           _emailController.text = userData['email'] ?? '';
-          _genderController.text = userData['gender'] ?? '';
+          _selectedGender = userData['gender'] ?? '';
           _goalController.text = userData['goal'] ?? '';
           _heightController.text = userData['height']?.toString() ?? '';
           _weightController.text = userData['weight']?.toString() ?? '';
@@ -63,17 +63,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await FirebaseFirestore.instance.collection('users').doc(user?.uid).update({
         'email': _emailController.text,
-        'gender': _genderController.text,
+        'gender': _selectedGender,
         'goal': _goalController.text,
         'height': int.parse(_heightController.text),
         'weight': double.parse(_weightController.text),
-        'calories': double.parse(_caloriesController.text),
+        /*'calories': double.parse(_caloriesController.text),
         'macronutrients': {
           'Carboidratos (g)': double.parse(_carbsController.text),
           'Gorduras (g)': double.parse(_fatController.text),
           'Proteínas (g)': double.parse(_proteinController.text),
         },
-        'tmb': double.parse(_tmbController.text),
+        'tmb': double.parse(_tmbController.text),*/
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -96,20 +96,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text('Perfil')),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _genderController,
-              decoration: InputDecoration(labelText: 'Gênero'),
+  return Scaffold(
+  appBar: AppBar(title: Text('Perfil')),
+  body: SingleChildScrollView(
+  padding: EdgeInsets.all(16),
+  child: Column(
+  crossAxisAlignment: CrossAxisAlignment.end,
+  children: [
+  TextField(
+  controller: _emailController,
+  decoration: InputDecoration(labelText: 'Email'),
+  ),
+  DropdownButtonFormField<String>(
+  decoration: InputDecoration(labelText: 'Gênero'),
+              items: [
+                DropdownMenuItem(value: "Masculino", child: Text("Masculino")),
+                DropdownMenuItem(value: "Feminino", child: Text("Feminino")),
+              ],
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedGender = newValue;
+                });
+              },
+              value: _selectedGender,
             ),
             TextField(
               controller: _goalController,
@@ -125,31 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               decoration: InputDecoration(labelText: 'Peso (kg)'),
               keyboardType: TextInputType.number,
             ),
-            TextField(
-              controller: _caloriesController,
-              decoration: InputDecoration(labelText: 'Calorias diárias'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _carbsController,
-              decoration: InputDecoration(labelText: 'Carboidratos (g)'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _fatController,
-              decoration: InputDecoration(labelText: 'Gorduras (g)'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _proteinController,
-              decoration: InputDecoration(labelText: 'Proteínas (g)'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _tmbController,
-              decoration: InputDecoration(labelText: 'Taxa Metabólica Basal (TMB)'),
-              keyboardType: TextInputType.number,
-            ),
+            // Aqui você pode adicionar outros campos como calorias e macronutrientes
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _saveUserData,

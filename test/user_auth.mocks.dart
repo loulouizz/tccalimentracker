@@ -21,7 +21,6 @@ import 'package:flutter/cupertino.dart';
 
   void main (){
     setUpAll(() async {
-      // Inicializa o Firebase para testes
       TestWidgetsFlutterBinding.ensureInitialized();
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
@@ -35,3 +34,6 @@ import 'package:flutter/cupertino.dart';
       expectLater(auth.authStateChanges, emitsInOrder([_mockUser]));
     });
   }
+
+  // teste unitario de login só para verificar se o email/cpf é válido
+  // testar os dados quanto à entrada e saída
