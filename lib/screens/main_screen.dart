@@ -108,9 +108,7 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  Future<void> signOut() async {
-    await Auth().signOut();
-  }
+
 
   Widget _title() {
     return Text(dayAndMonth);
@@ -481,10 +479,8 @@ class _MainScreenState extends State<MainScreen> {
               ),
 
 
-              IconButton(
-                onPressed: signOut,
-                icon: Icon(Icons.local_fire_department_sharp, color: Colors.orange,),
-              ),
+              Icon(Icons.local_fire_department_sharp, color: Colors.orange,),
+
             ],
           )
         ],

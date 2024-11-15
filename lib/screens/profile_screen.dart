@@ -1,3 +1,4 @@
+import 'package:alimentracker/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadUserData();
+  }
+
+  Future<void> signOut() async {
+    await Auth().signOut();
   }
 
   Future<void> _loadUserData() async {
@@ -134,12 +139,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               decoration: InputDecoration(labelText: 'Peso (kg)'),
               keyboardType: TextInputType.number,
             ),
-            // Aqui você pode adicionar outros campos como calorias e macronutrientes
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _saveUserData,
               child: Text('Salvar'),
             ),
+            SizedBox(height: 10,),
+            ElevatedButton(onPressed: signOut, child: Text("Logout", style: TextStyle(color: Colors.red),),),
           ],
         ),
       ),
